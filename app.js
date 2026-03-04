@@ -53,6 +53,10 @@ function roomDisplayName(room) {
   return room.base_attributes?.name || room.room_type;
 }
 
+function roomHumanName(room) {
+  return room.base_attributes?.name || room.base_attributes?.shortName || room.room_type;
+}
+
 function formatValue(value) {
   if (value === null) return "null";
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -500,8 +504,8 @@ function renderRooms(rooms) {
     const tagsSection = card.querySelector(".room-tags-section");
     const behaviorsSection = card.querySelector(".room-behaviors-section");
 
-    titleEl.textContent = roomDisplayName(room);
-    keyEl.textContent = room.room_type;
+    titleEl.textContent = room.room_type;
+    keyEl.textContent = roomHumanName(room);
     pinBtnEl.dataset.roomType = room.room_type;
     const isPinned = pinnedRoomTypes.has(room.room_type);
     pinBtnEl.setAttribute("aria-pressed", String(isPinned));

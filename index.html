@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room Types Visualizer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="background-glow"></div>
+    <div class="app-shell">
+      <header class="page-header">
+        <p class="eyebrow">Room Catalog</p>
+        <h1>Room Types Visualizer</h1>
+        <p class="subtitle">Browse room definitions, parameters, and behavior tags.</p>
+      </header>
+
+      <section class="controls">
+        <input id="jsonFileInput" type="file" accept=".json,application/json" />
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">&#128269;</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search room names, keys, and attributes..."
+            aria-label="Search rooms"
+          />
+        </div>
+
+        <div id="resultCount" class="result-count"></div>
+      </section>
+
+      <section class="filters-panel">
+        <div class="filters-header">
+          <h2>Filters</h2>
+          <button id="resetFilterBuilderBtn" type="button" class="clear-filters-btn">Reset</button>
+        </div>
+        <p class="filters-help">Build simple or nested filters (AND/OR), similar to Notion databases.</p>
+        <div id="filterBuilder" class="filter-builder"></div>
+      </section>
+
+      <main id="roomList" class="room-list"></main>
+    </div>
+
+    <template id="roomCardTemplate">
+      <article class="room-card">
+        <div class="room-card-header">
+          <div class="room-heading">
+            <h2 class="room-title"></h2>
+            <button class="pin-btn" type="button" aria-pressed="false" title="Pin room for comparison">
+              Pin
+            </button>
+          </div>
+          <span class="room-key"></span>
+        </div>
+
+        <section class="room-section">
+          <h3>Attributes</h3>
+          <dl class="attribute-list"></dl>
+        </section>
+
+        <section class="room-section room-tags-section">
+          <h3>Behavior Tags</h3>
+          <div class="behavior-tags"></div>
+        </section>
+
+        <section class="room-section room-behaviors-section">
+          <h3>Unique Behaviors</h3>
+          <ul class="behavior-list"></ul>
+        </section>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

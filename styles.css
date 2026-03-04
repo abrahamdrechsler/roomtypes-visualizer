@@ -11,6 +11,8 @@
   --chip-bg: #f1f5ff;
   --shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
   --shadow-hover: 0 18px 36px rgba(15, 23, 42, 0.13);
+  --blackbox: #4b3f9b;
+  --blackbox-soft: #f1eeff;
 }
 
 * {
@@ -226,6 +228,23 @@ body {
   padding: 0 12px;
 }
 
+.attribute-mode-toggle-btn {
+  border: 1px solid #d2ddf4;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.attribute-mode-toggle-btn:hover {
+  background: #f8fbff;
+  border-color: #becdec;
+}
+
 .search-icon {
   color: #94a3b8;
   font-size: 0.95rem;
@@ -346,6 +365,22 @@ body {
   margin: 0;
   overflow-wrap: anywhere;
   color: #0f172a;
+}
+
+.attribute-list dt.attribute-blackboxed,
+.attribute-list dd.attribute-blackboxed {
+  color: var(--blackbox);
+  background: var(--blackbox-soft);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.attribute-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #64748b;
+  font-style: italic;
+  font-size: 0.84rem;
 }
 
 .behavior-tags {

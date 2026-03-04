@@ -5,14 +5,19 @@ const roomList = document.getElementById("roomList");
 const roomCardTemplate = document.getElementById("roomCardTemplate");
 const filterBuilderEl = document.getElementById("filterBuilder");
 const resetFilterBuilderBtn = document.getElementById("resetFilterBuilderBtn");
+const attributeModeToggleBtn = document.getElementById("attributeModeToggleBtn");
 
 const PINNED_STORAGE_KEY = "room_types_visualizer_pinned_rooms";
+const ATTRIBUTE_MODE_STORAGE_KEY = "room_types_visualizer_attribute_mode";
+const DEFAULT_INSPECTOR_VISIBLE_KEYS = ["roomType", "name", "shortName", "roomClass", "roomEnclosure"];
 
 let allRooms = [];
 let pinnedRoomTypes = new Set();
 let fieldRegistry = [];
 let filterTree = makeDefaultFilterTree();
 let idCounter = 0;
+let inspectorVisibleAttributeKeys = new Set(DEFAULT_INSPECTOR_VISIBLE_KEYS);
+let attributeVisibilityMode = "all";
 
 function nextId(prefix = "id") {
   idCounter += 1;
@@ -189,6 +194,55 @@ function loadPinnedState() {
 
 function persistPinnedState() {
   localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify([...pinnedRoomTypes]));
+}
+
+function loadAttributeModeState() {
+  const raw = localStorage.getItem(ATTRIBUTE_MODE_STORAGE_KEY);
+  attributeVisibilityMode = raw === "inspector" ? "inspector" : "all";
+  updateAttributeToggleButtonLabel();
+}
+
+function persistAttributeModeState() {
+  localStorage.setItem(ATTRIBUTE_MODE_STORAGE_KEY, attributeVisibilityMode);
+}
+
+function updateAttributeToggleButtonLabel() {
+  attributeModeToggleBtn.textContent =
+    attributeVisibilityMode === "inspector"
+      ? "Show all parameters"
+      : "Show inspector only parameters";
+}
+
+function isPublicVisibilityValue(rawValue) {
+  const normalized = String(rawValue ?? "").trim().toLowerCase();
+  if (!normalized) return false;
+  if (normalized === "publicly_visible" || normalized === "publically_visible") return true;
+  if (normalized === "visible") return true;
+  if (normalized.startsWith("not_")) return false;
+  if (normalized.startsWith("not ")) return false;
+  return normalized.includes("public") && !normalized.includes("not");
+}
+
+function buildInspectorVisibleKeys(jsonObject) {
+  const keys = new Set(DEFAULT_INSPECTOR_VISIBLE_KEYS);
+
+  const parameterVisibility = jsonObject?.parameter_visibility;
+  if (parameterVisibility && typeof parameterVisibility === "object") {
+    for (const [key, visibility] of Object.entries(parameterVisibility)) {
+      if (isPublicVisibilityValue(visibility)) {
+        keys.add(key);
+      }
+    }
+    return keys;
+  }
+
+  const shared = Array.isArray(jsonObject?.shared_attributes) ? jsonObject.shared_attributes : [];
+  for (const key of shared) {
+    if (typeof key === "string" && key.trim()) {
+      keys.add(key);
+    }
+  }
+  return keys;
 }
 
 function normalizeData(json) {
@@ -453,34 +507,57 @@ function renderRooms(rooms) {
     pinBtnEl.setAttribute("aria-pressed", String(isPinned));
     pinBtnEl.textContent = isPinned ? "Pinned" : "Pin";
 
+    let renderedAttributeCount = 0;
     for (const [key, value] of Object.entries(room.base_attributes || {})) {
+      const isInspectorVisible = inspectorVisibleAttributeKeys.has(key);
+      if (attributeVisibilityMode === "inspector" && !isInspectorVisible) {
+        continue;
+      }
+
       const dt = document.createElement("dt");
       const dd = document.createElement("dd");
       dt.textContent = key;
       dd.textContent = formatValue(value);
-      attributeListEl.append(dt, dd);
-    }
-
-    const tags = room.behavior_tags || [];
-    if (!tags.length) {
-      tagsSection.style.display = "none";
-    } else {
-      for (const tag of tags) {
-        const chip = document.createElement("span");
-        chip.className = "tag-chip";
-        chip.textContent = tag;
-        tagContainerEl.appendChild(chip);
+      if (!isInspectorVisible) {
+        dt.classList.add("attribute-blackboxed");
+        dd.classList.add("attribute-blackboxed");
       }
+      attributeListEl.append(dt, dd);
+      renderedAttributeCount += 1;
     }
 
-    const behaviors = room.unique_behaviors || [];
-    if (!behaviors.length) {
+    if (renderedAttributeCount === 0) {
+      const note = document.createElement("div");
+      note.className = "attribute-empty";
+      note.textContent = "No inspector-visible attributes for this room.";
+      attributeListEl.appendChild(note);
+    }
+
+    if (attributeVisibilityMode === "inspector") {
+      tagsSection.style.display = "none";
       behaviorsSection.style.display = "none";
     } else {
-      for (const behavior of behaviors) {
-        const li = document.createElement("li");
-        li.textContent = behavior;
-        behaviorListEl.appendChild(li);
+      const tags = room.behavior_tags || [];
+      if (!tags.length) {
+        tagsSection.style.display = "none";
+      } else {
+        for (const tag of tags) {
+          const chip = document.createElement("span");
+          chip.className = "tag-chip";
+          chip.textContent = tag;
+          tagContainerEl.appendChild(chip);
+        }
+      }
+
+      const behaviors = room.unique_behaviors || [];
+      if (!behaviors.length) {
+        behaviorsSection.style.display = "none";
+      } else {
+        for (const behavior of behaviors) {
+          const li = document.createElement("li");
+          li.textContent = behavior;
+          behaviorListEl.appendChild(li);
+        }
       }
     }
 
@@ -600,6 +677,7 @@ function handleFilterBuilderChange(event) {
 
 function loadFromObject(jsonObject) {
   allRooms = normalizeData(jsonObject);
+  inspectorVisibleAttributeKeys = buildInspectorVisibleKeys(jsonObject);
   fieldRegistry = buildFieldRegistry(allRooms);
   filterTree = makeDefaultFilterTree();
   renderFilterBuilder();
@@ -642,6 +720,13 @@ resetFilterBuilderBtn.addEventListener("click", () => {
   applyFilters();
 });
 
+attributeModeToggleBtn.addEventListener("click", () => {
+  attributeVisibilityMode = attributeVisibilityMode === "inspector" ? "all" : "inspector";
+  updateAttributeToggleButtonLabel();
+  persistAttributeModeState();
+  applyFilters();
+});
+
 roomList.addEventListener("click", (event) => {
   const button = event.target.closest(".pin-btn");
   if (!button) return;
@@ -657,4 +742,5 @@ roomList.addEventListener("click", (event) => {
 });
 
 loadPinnedState();
+loadAttributeModeState();
 tryLoadLocalDefault();

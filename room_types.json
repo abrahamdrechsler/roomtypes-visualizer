@@ -3711,5 +3711,35 @@
         "open_to_above"
       ]
     }
+  },
+  "parameter_visibility": {
+    "roomType": "publicly_visible",
+    "name": "not_publicly_visible",
+    "shortName": "not_publicly_visible",
+    "roomEnclosure": "publicly_visible",
+    "roomClass": "publicly_visible",
+    "bedroomCount": "publicly_visible",
+    "bathroomCount": "publicly_visible",
+    "garageCount": "publicly_visible",
+    "singleDoor": "not_publicly_visible",
+    "openToBelow": "not_publicly_visible",
+    "openToAbove": "not_publicly_visible",
+    "openToAdjacent": "not_publicly_visible",
+    "isCirculation": "not_publicly_visible",
+    "exteriorCeilingMaterial": "not_publicly_visible",
+    "windowType": "not_publicly_visible",
+    "hasBaseTrimMolding": "publicly_visible",
+    "hasInteriorWallFacades": "not_publicly_visible",
+    "hasCurb": "not_publicly_visible",
+    "lightIntensityOverride": "not_publicly_visible",
+    "hiddenInEditor": "not_publicly_visible",
+    "roomTagHiddenInPlan": "publicly_visible",
+    "roomSalesLabelHiddenInBrochure": "publicly_visible",
+    "labelDimensionType": "publicly_visible",
+    "labelWidthOverride": "publicly_visible",
+    "labelHeightOverride": "publicly_visible",
+    "hasExteriorTrim": "publicly_visible",
+    "hasCrownTrimMolding": "publicly_visible",
+    "disableInteriorDimensions": "publicly_visible"
   }
 }
